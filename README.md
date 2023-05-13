@@ -3,7 +3,7 @@
 ## Technology for build this project:
 
 For FrontEnd:
-
+- **CSS**
 - **Blazor**
 
 For BackEnd:
