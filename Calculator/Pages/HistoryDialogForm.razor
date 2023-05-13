@@ -1,0 +1,55 @@
+﻿<MudDialog Style="width:30%;height:50%">
+    <DialogContent>
+            @foreach(var result in Results)
+            {
+                <MudItem Class="d-flex justify-space-between align-center">
+                    <MudItem Class="d-flex justify-start align-center gap-2">
+                    <MudText Color="Color.Error" Typo="Typo.h6">Answer:</MudText>
+                    <MudText Color="Color.Info" Typo="Typo.h6">@result.Answer</MudText>
+                    </MudItem>
+                <MudText Color="Color.Dark" Typo="Typo.h6">@result.Date</MudText>
+                </MudItem>
+            }
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="Ok">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+    private bool Loading = false;
+
+    public IList<CalculatorViewModel> Results = new List<CalculatorViewModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Results = await _httpService.Get<List<CalculatorViewModel>>("/api/Calculator");
+            for(int i = 0; i < Results.Count; i++)
+            {
+                Results[i].Date = LocalTime(Results[i].Date);
+            }
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    public DateTime LocalTime(DateTime Date)
+    {
+        TimeZoneInfo localZone = TimeZoneInfo.Local;
+        DateTime localTime = TimeZoneInfo.ConvertTimeFromUtc(Date, localZone);
+        return localTime;
+    }
+    private void Ok()
+    {
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+}

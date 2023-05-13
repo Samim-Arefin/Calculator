@@ -1,0 +1,142 @@
+﻿@page "/"
+
+
+<PageTitle>Calculator</PageTitle>
+<MudItem Class="d-flex justify-center align-center align-content-center" Style="height:80%">
+    <MudCard Style="width:300px;height:auto;background-color:black;border-top-left-radius: 3%;border-top-right-radius: 3%" Elevation="5">
+        <MudCardContent>
+            <MudText Typo="Typo.h5" Align="Align.Center" Style="color:#ffffff">Calculator</MudText>
+            <MudGrid Class="px-6">
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="Model.Answer" Style="text-align:right;background-color:white;padding: 1rem 0rem;" Variant="Variant.Text" Margin="Margin.Dense" AutoFocus="false" ReadOnly></MudTextField>
+                    <MudItem Class="mt-4 d-flex justify-center align-center gap-4">
+                        <MudFab Color="Color.Primary" Style="color:white;" Label="C" OnClick="()=>Clear()"/>
+                        <MudFab Color="Color.Primary" Style="color:white;" Label="DEL" OnClick="()=>Del()" />
+                        <MudFab Color="Color.Primary" Style="color:white;" Label="%" OnClick="()=>Expression('%')" />
+                        <MudFab Color="Color.Primary" Style="color:white;" Label="÷" OnClick="()=>Expression('÷')" />
+                    </MudItem>
+                    <MudItem Class="mt-4 d-flex justify-center align-center gap-4">
+                        <MudFab Color="Color.Primary" Style="color:white;" Label="7" OnClick="()=>Expression('7')" />
+                        <MudFab Color="Color.Primary" Style="color:white;" Label="8" OnClick="()=>Expression('8')" />
+                        <MudFab Color="Color.Primary" Style="color:white;" Label="9" OnClick="()=>Expression('9')" />
+                        <MudFab Color="Color.Primary" Style="color:white;" Label="x" OnClick="()=>Expression('x')" />
+                    </MudItem>
+                    <MudItem Class="mt-4 d-flex justify-center align-center gap-4">
+                        <MudFab Color="Color.Primary" Style="color:white;" Label="4" OnClick="()=>Expression('4')" />
+                        <MudFab Color="Color.Primary" Style="color:white;" Label="5" OnClick="()=>Expression('5')" />
+                        <MudFab Color="Color.Primary" Style="color:white;" Label="6" OnClick="()=>Expression('6')" />
+                        <MudFab Color="Color.Primary" Style="color:white;" Label="-" OnClick="()=>Expression('-')" />
+                    </MudItem>
+                    <MudItem Class="mt-4 d-flex justify-center align-center gap-4">
+                        <MudFab Color="Color.Primary" Style="color:white;" Label="1" OnClick="()=>Expression('1')" />
+                        <MudFab Color="Color.Primary" Style="color:white;" Label="2" OnClick="()=>Expression('2')" />
+                        <MudFab Color="Color.Primary" Style="color:white;" Label="3" OnClick="()=>Expression('3')" />
+                        <MudFab Color="Color.Primary" Style="color:white;" Label="+" OnClick="()=>Expression('+')" />
+                    </MudItem>
+                    <MudItem Class="mt-4 d-flex justify-center align-center gap-4">
+                        <MudFab Color="Color.Primary" Style="color:white;" Label="0" OnClick="()=>Expression('0')" />
+                        <MudFab Color="Color.Primary" Style="color:white;" Label="." OnClick="()=>Expression('.')" />
+                        <MudFab Color="Color.Primary" Style="color:white;" Label="HIS" OnClick="OpenHistory"/>
+                        <MudFab Color="Color.Primary" Style="background-color:orange;color:white;" Label="=" OnClick="()=>EvaluateExpression()" />
+                    </MudItem>
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+</MudItem>
+
+<style>
+   input.mud-input-root.mud-input-root-margin-dense, div.mud-input-slot.mud-input-root.mud-input-root-margin-dense {
+        text-align: right !important;
+        padding-right:0.7rem;
+        font-weight: bold;
+        font-size:2rem;
+    }
+</style>
+
+@code {
+    public CalculatorViewModel Model = new CalculatorViewModel
+        {
+            Answer = string.Empty
+        };
+
+    public void Expression(char ch)
+    {
+        try
+        {
+            if(Model.Answer =="Math Error" || Model.Answer=="Syntax Error")
+            {
+                Model.Answer = string.Empty;
+                Model.Answer += ch;
+            }
+            else
+            {
+                Model.Answer += ch;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    public void Clear()
+    {
+        try
+        {
+            Model.Answer = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    public void Del()
+    {
+        try
+        {
+            Model.Answer = Model.Answer.Substring(0, Model.Answer.Length - 1);
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+    public async Task OpenHistory()
+    {
+        var result = await _dialog.Show<HistoryDialogForm>("History").Result;
+    }
+    public void EvaluateExpression()
+    {
+
+        if (Model.Answer.Length != 0)
+        {
+            Model.Answer = Model.Answer.Replace("x", "*").Replace("÷", "/");
+            Console.WriteLine(Model.Answer);
+            try
+            {
+                Expression expression = new Expression(Model.Answer);
+                Object value = expression.Eval();
+                var result = value.ToString();
+                Model.Answer = result;
+                try
+                {
+                    var response = _httpService.Post<ResponseModel>("/api/Calculator",Model);
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            }
+            catch (DivideByZeroException ex)
+            {
+                Model.Answer = "Math Error";
+            }
+            catch(Exception ex)
+            {
+                Model.Answer = "Syntax Error";
+            }
+        }
+    }
+}
