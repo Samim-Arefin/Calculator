@@ -2,6 +2,7 @@
 
 
 <PageTitle>Calculator</PageTitle>
+
 <MudItem Class="d-flex justify-center align-center align-content-center" Style="height:80%">
     <MudCard Style="width:300px;height:auto;background-color:black;border-top-left-radius: 3%;border-top-right-radius: 3%" Elevation="5">
         <MudCardContent>
@@ -50,7 +51,7 @@
         text-align: right !important;
         padding-right:0.7rem;
         font-weight: bold;
-        font-size:2rem;
+        font-size:1.5rem;
     }
 </style>
 
@@ -113,16 +114,21 @@
         if (Model.Answer.Length != 0)
         {
             Model.Answer = Model.Answer.Replace("x", "*").Replace("÷", "/");
-            Console.WriteLine(Model.Answer);
+            var arithmeticExpression = Model.Answer;
             try
             {
                 Expression expression = new Expression(Model.Answer);
                 Object value = expression.Eval();
                 var result = value.ToString();
                 Model.Answer = result;
+                var solution = new CalculatorViewModel
+                {
+                        Answer = arithmeticExpression + " = " + result
+                };
+
                 try
                 {
-                    var response = _httpService.Post<ResponseModel>("/api/Calculator",Model);
+                    var response = _httpService.Post<ResponseModel>("/api/Calculator",solution);
                 }
                 catch(Exception ex)
                 {

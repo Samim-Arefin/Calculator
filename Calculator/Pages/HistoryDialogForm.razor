@@ -1,15 +1,15 @@
-﻿<MudDialog Style="width:30%;height:50%">
+﻿<MudDialog Style="width:auto;height:50%">
     <DialogContent>
+          <MudGrid>
+              
             @foreach(var result in Results)
             {
-                <MudItem Class="d-flex justify-space-between align-center">
-                    <MudItem Class="d-flex justify-start align-center gap-2">
-                    <MudText Color="Color.Error" Typo="Typo.h6">Answer:</MudText>
-                    <MudText Color="Color.Info" Typo="Typo.h6">@result.Answer</MudText>
-                    </MudItem>
-                <MudText Color="Color.Dark" Typo="Typo.h6">@result.Date</MudText>
+                <MudItem xs="12" Class="d-flex flex-column justify-center align-start gap-2">
+                     <MudText Color="Color.Dark" Typo="Typo.h6">@result.Date</MudText>
+                     <MudText Color="Color.Info" Typo="Typo.h6">@result.Answer</MudText>
                 </MudItem>
             }
+          </MudGrid>
     </DialogContent>
     <DialogActions>
         <MudButton Color="Color.Primary" OnClick="Ok">Ok</MudButton>
